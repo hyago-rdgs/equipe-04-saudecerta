@@ -1,0 +1,36 @@
+# Compilados Java
+*.class
+*.jar
+*.war
+*.ear
+
+# Build
+target/
+build/
+out/
+
+# IDEs
+.idea/
+*.iml
+.classpath
+.project
+.settings/
+.vscode/
+
+# Sistema operacional
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# Logs
+*.log
+
+# Arquivos temporários
+*.tmp
+*.swp
+*.bak
+
+# Variáveis de ambiente e configurações locais
+.env
+.env.*
+!.env.example
