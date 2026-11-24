@@ -2,7 +2,7 @@ import { api } from '../api.js';
 import {
   html, desenhar, dataCurta, dataEHora, hora, idade, etiqueta, avisar, avisarErro, lerFormulario,
 } from '../util.js';
-import { cartaoDeMissao } from './missao.js';
+import { listaDePrescricoes, montarPrescricoes } from './prescricoes.js';
 
 function cabecalhoDoPaciente(paciente) {
   return html`
@@ -32,6 +32,7 @@ function historico(atendimentos, ignorarId) {
           ${a.queixaPrincipal ? html`<h3>${a.queixaPrincipal}</h3>` : ''}
           ${a.evolucao ? html`<p><b>Evolução.</b> ${a.evolucao}</p>` : ''}
           ${a.conduta ? html`<p><b>Conduta.</b> ${a.conduta}</p>` : ''}
+          ${a.prescricoes.length ? html`<h4>Prescrições</h4>${listaDePrescricoes(a.prescricoes)}` : ''}
         </li>`)}
     </ol>`;
 }
@@ -99,9 +100,9 @@ export async function telaAtendimento(area, { parametro }) {
           : html`<p class="dica">Atendimento finalizado em ${dataEHora(atendimento.fim)}. O registro não pode mais ser alterado.</p>`}
         </form>
       </section>
-      <section class="quadro">
-        <h2>Prescrição</h2>
-        ${cartaoDeMissao('E3-2')}
+      <section class="quadro" id="prescricoes">
+        <h2>Prescrições</h2>
+        <div data-prescricoes></div>
       </section>
       </div>
       <section class="quadro">
@@ -109,6 +110,8 @@ export async function telaAtendimento(area, { parametro }) {
         ${historico(prontuario.atendimentos, atendimento.id)}
       </section>
     </div>`);
+
+  montarPrescricoes(area.querySelector('#prescricoes'), atendimento);
 
   if (!aberto) return;
   const formulario = area.querySelector('#form-atendimento');

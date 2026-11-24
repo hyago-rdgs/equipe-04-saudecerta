@@ -5,8 +5,8 @@ const DEMONSTRACAO = [
   ['recepcao', 'Recepção', 'agenda e cadastros'],
   ['ana', 'Dra. Ana Beatriz', 'atendimento e prontuário'],
   ['rafael', 'Dr. Rafael', 'atendimento e prontuário'],
-  ['admin', 'Administração', 'profissionais e auditoria'],
-  ['joana', 'Joana (paciente)', 'portal, ainda por fazer'],
+  ['admin', 'Administração', 'profissionais, auditoria e relatórios'],
+  ['joana', 'Joana (paciente)', 'consultas agendadas e histórico'],
 ];
 
 export function telaLogin(raiz, aoEntrar) {

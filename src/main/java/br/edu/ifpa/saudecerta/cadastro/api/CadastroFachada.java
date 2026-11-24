@@ -12,6 +12,12 @@ import java.util.Optional;
  */
 public interface CadastroFachada {
 
+    /**
+     * Serializa as reservas que compartilham o profissional ou o paciente.
+     * O bloqueio dura até o fim da transação de quem solicitou a reserva.
+     */
+    void bloquearParaReserva(Long profissionalId, Long pacienteId);
+
     Optional<PacienteResumo> paciente(Long id);
 
     Map<Long, PacienteResumo> pacientes(Collection<Long> ids);

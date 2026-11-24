@@ -1,5 +1,8 @@
 package br.edu.ifpa.saudecerta.prontuario.adaptador.web;
 
+import java.util.List;
+
+import org.springframework.http.HttpStatus;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -7,13 +10,15 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
-import br.edu.ifpa.saudecerta.compartilhado.erro.MissaoPendenteException;
 import br.edu.ifpa.saudecerta.prontuario.aplicacao.AtendimentoInfo;
+import br.edu.ifpa.saudecerta.prontuario.aplicacao.PrescricaoInfo;
 import br.edu.ifpa.saudecerta.prontuario.aplicacao.ProntuarioInfo;
 import br.edu.ifpa.saudecerta.prontuario.aplicacao.ProntuarioService;
 import br.edu.ifpa.saudecerta.prontuario.aplicacao.RegistroClinico;
+import br.edu.ifpa.saudecerta.prontuario.dominio.Prescricao.Item;
 import br.edu.ifpa.saudecerta.seguranca.api.UsuarioAtual;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
@@ -23,6 +28,9 @@ import jakarta.validation.constraints.NotNull;
 public class ProntuarioController {
 
     public record InicioDeAtendimento(@NotNull(message = "Informe a consulta") Long consultaId) {
+    }
+
+    public record NovaPrescricao(@NotNull(message = "Informe os medicamentos.") List<Item> itens) {
     }
 
     private final ProntuarioService prontuario;
@@ -58,15 +66,15 @@ public class ProntuarioController {
         return prontuario.finalizar(id, UsuarioAtual.de(token));
     }
 
-    // ---- MISSAO E3-2: prescricoes ----
-
     @GetMapping("/api/atendimentos/{id}/prescricoes")
-    public Object prescricoes(@PathVariable Long id) {
-        throw new MissaoPendenteException("E3-2", "Prescrições ainda não implementadas. Veja a missão E3-2 em MISSOES.md.");
+    public List<PrescricaoInfo> prescricoes(@PathVariable Long id, @AuthenticationPrincipal Jwt token) {
+        return prontuario.lerPrescricoes(id, UsuarioAtual.de(token));
     }
 
     @PostMapping("/api/atendimentos/{id}/prescricoes")
-    public Object prescrever(@PathVariable Long id) {
-        throw new MissaoPendenteException("E3-2", "Prescrições ainda não implementadas. Veja a missão E3-2 em MISSOES.md.");
+    @ResponseStatus(HttpStatus.CREATED)
+    public PrescricaoInfo prescrever(@PathVariable Long id, @Valid @RequestBody NovaPrescricao dados,
+            @AuthenticationPrincipal Jwt token) {
+        return prontuario.prescrever(id, dados.itens(), UsuarioAtual.de(token));
     }
 }

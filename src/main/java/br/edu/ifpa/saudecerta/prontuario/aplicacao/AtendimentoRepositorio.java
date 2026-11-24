@@ -12,6 +12,8 @@ public interface AtendimentoRepositorio {
 
     Optional<Atendimento> buscarPorId(Long id);
 
+    Optional<Atendimento> buscarParaAlterar(Long id);
+
     Optional<Atendimento> buscarPorConsulta(Long consultaId);
 
     /** Historico do paciente, do mais recente para o mais antigo. */

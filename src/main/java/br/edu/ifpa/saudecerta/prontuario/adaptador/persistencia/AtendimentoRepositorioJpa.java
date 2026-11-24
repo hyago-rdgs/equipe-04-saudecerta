@@ -29,6 +29,11 @@ public class AtendimentoRepositorioJpa implements AtendimentoRepositorio {
     }
 
     @Override
+    public Optional<Atendimento> buscarParaAlterar(Long id) {
+        return jpa.buscarParaAlterar(id).map(AtendimentoJpa::paraDominio);
+    }
+
+    @Override
     public Optional<Atendimento> buscarPorConsulta(Long consultaId) {
         return jpa.findByConsultaId(consultaId).map(AtendimentoJpa::paraDominio);
     }

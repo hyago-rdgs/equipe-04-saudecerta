@@ -1,5 +1,8 @@
 # ADR-004 — Controle de concorrência na marcação de consultas
 
+> Decisão da etapa de projeto arquitetural. A implementação do protótipo E3-5 segue a [ADR 0011](0011-reservas-concorrentes.md).
+
+
 | Campo | Valor |
 |---|---|
 | Status | **Aceito** |

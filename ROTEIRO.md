@@ -47,7 +47,7 @@ Pela IDE: abra a pasta como projeto Maven, espere a importação terminar e exec
 
 1. Abra <http://localhost:8080>. Deve aparecer a tela de entrada do SaúdeCerta.
 2. Abra <http://localhost:8080/swagger-ui.html>. Deve aparecer a documentação da API.
-3. Em outro terminal, na pasta do projeto, rode `mvn test`. O resultado esperado é `BUILD SUCCESS`, com alguns testes marcados como ignorados (são os da missão E3-2).
+3. Em outro terminal, na pasta do projeto, rode `mvn test`. O resultado esperado é `BUILD SUCCESS`.
 
 Para parar a aplicação, volte ao terminal onde ela roda e pressione `Ctrl+C`.
 
@@ -112,10 +112,10 @@ Marque cada requisito quando você o tiver visto funcionar.
 | RF12 | Finalizar o atendimento, que não pode mais ser alterado | 4 | pronto |
 | RF13 | Consultar o histórico clínico (prontuário) do paciente | 4 | pronto |
 | RF14 | Consultar a trilha de auditoria: quem fez o quê e quando | 5 | pronto |
-| RF15 | Remarcar consulta | 3 | **missão E3-1** |
-| RF16 | Prescrever medicamentos no atendimento | 4 | **missão E3-2** |
-| RF17 | Relatórios de consultas por período | 5 | **missão E3-3** |
-| RF18 | Portal do paciente: ver e cancelar as próprias consultas | 7 | **missão E3-4** |
+| RF15 | Remarcar consulta | 3 | pronto |
+| RF16 | Prescrever medicamentos no atendimento | 4 | pronto |
+| RF17 | Relatórios de consultas por período | 5 | pronto |
+| RF18 | Portal do paciente: ver e cancelar as próprias consultas | 7 | pronto |
 
 Antes de começar, abra a barra escura **Raio-X** no rodapé (clique em "Abrir") e deixe-a aberta. Ela mostra o caminho de cada requisição pelas camadas do servidor. Você vai usá-la em todas as etapas.
 
@@ -197,13 +197,13 @@ As regras da clínica: consultas de 30 minutos, das 07:00 às 19:00, de segunda 
 3. Ainda em amanhã: a paciente Larissa Couto Maués já tem consulta às 09:00 com a Dra. Ana. Tente agendar a **mesma Larissa**, às **09:00**, com o **Dr. Caio**.
 4. Avance até o próximo domingo e tente agendar qualquer consulta.
 5. Clique em uma consulta com situação "Agendada", depois em "Cancelar…", e tente cancelar sem motivo. Depois informe um motivo.
-6. Clique em outra consulta "Agendada" e depois em "Remarcar…".
+6. Clique em outra consulta "Agendada" e depois em "Remarcar…". Escolha a nova data, selecione um horário livre e confirme.
 
 **Observe**
 
 - Passo 3: o agendamento é recusado porque a paciente não pode estar em dois lugares. (Se amanhã for domingo, a mensagem será a do domingo; faça o teste em outro dia agendando duas vezes a mesma pessoa.)
 - Passo 5: a consulta cancelada fica riscada e o horário volta a aceitar agendamento.
-- Passo 6: a API responde que a remarcação é uma missão pendente.
+- Passo 6: a consulta aparece no novo horário como "Agendada". A auditoria mostra os horários anterior e novo.
 
 **Responda**
 
@@ -226,7 +226,7 @@ As regras da clínica: consultas de 30 minutos, das 07:00 às 19:00, de segunda 
 6. Abra "Agenda" e localize a consulta que você acabou de atender.
 7. Abra "Pacientes" e clique em "Prontuário" de Miguel Antônio Sarmento (paciente do Dr. Rafael).
 8. Na barra de endereço, troque o final da URL para `#/atendimento/12` (uma consulta do Dr. Rafael) e pressione Enter.
-9. Volte ao atendimento de outra paciente que esteja aguardando e role até "Prescrição".
+9. Volte ao atendimento de outra paciente que esteja aguardando e role até "Prescrições". Emita uma prescrição com informações fictícias e confira o registro no histórico.
 
 **Observe**
 
@@ -241,7 +241,7 @@ As regras da clínica: consultas de 30 minutos, das 07:00 às 19:00, de segunda 
 1. Onde está a regra "não finaliza sem evolução"? E a regra "só o profissional responsável altera"? (Procure em `Atendimento`.)
 2. Qualquer profissional lê qualquer prontuário. Isso é uma falha ou uma decisão? Leia `docs/adr/0004-controle-de-acesso-rbac.md` e diga se você concorda.
 3. Tente, como `ana`, atender um paciente que ainda está "Agendado" (sem chegada confirmada), trocando o número na URL. O que acontece e qual classe decide isso?
-4. O que precisaria existir, em cada camada, para a prescrição funcionar? Liste as classes que você criaria.
+4. Quais classes participam da emissão da prescrição? Confira a API, o serviço, o domínio e a persistência.
 
 ---
 
@@ -253,7 +253,7 @@ As regras da clínica: consultas de 30 minutos, das 07:00 às 19:00, de segunda 
 2. Abra "Auditoria". Localize: a tentativa de acesso recusada; as leituras de prontuário que você fez como `ana`; o cadastro do paciente da etapa 2.
 3. Use o filtro "Mostrar apenas o que envolve o paciente" e escolha Joana Batista Ferreira.
 4. Abra <http://localhost:8080/swagger-ui.html>, faça login pelo endpoint `POST /api/auth/login` com o usuário `admin`, copie o `token`, clique em "Authorize" (se disponível) ou use o arquivo `docs/api.http`, e chame `GET /api/pacientes/1/prontuario`.
-5. Abra "Relatórios".
+5. Abra "Relatórios", clique em "Consultar" e compare o total geral com as três tabelas. Depois inverta as datas para conferir a validação.
 
 **Observe**
 
@@ -296,7 +296,8 @@ As regras da clínica: consultas de 30 minutos, das 07:00 às 19:00, de segunda 
 **Faça**
 
 1. Entre como `joana`.
-2. Leia o cartão da missão.
+2. Abra "Minhas consultas" e confira as próximas consultas e o histórico.
+3. Em uma consulta futura, clique em "Cancelar…", informe um motivo e confirme.
 
 **Responda**
 
@@ -335,13 +336,16 @@ Abra `docs/api.http` no IntelliJ ou no VS Code (extensão REST Client) e execute
 mvn test
 ```
 
-Abra os três tipos de teste e compare:
+Compare os tipos de teste abaixo.
 
 | Teste | O que verifica | Sobe o Spring? |
 |---|---|---|
 | `ConsultaTest`, `AtendimentoTest`, `CpfTest` | regras de domínio | não |
+| `AgendaServiceTest`, `ProntuarioServiceTest` | casos de uso com portas em memória e relógio fixo | não |
 | `ArquiteturaTest` | regras de dependência entre camadas e módulos | não |
-| `FluxoDaClinicaTest` | a API de ponta a ponta | sim |
+| `FluxoDaClinicaTest` | a API de ponta a ponta e as reservas concorrentes | sim |
+
+A [comparação da E3-6](docs/testes-dos-casos-de-uso.md) registra os tempos e explica o papel das portas nos testes.
 
 **Responda:** qual tipo demora mais? Por quê? Qual você rodaria a cada alteração e qual só antes de enviar o código?
 

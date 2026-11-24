@@ -10,6 +10,8 @@ public interface AgendaFachada {
 
     List<ConsultaInfo> consultasDoDia(LocalDate data, Long profissionalId);
 
+    List<TotalDeConsultas> totaisPorProfissionalESituacao(LocalDate de, LocalDate ate);
+
     /** CONFIRMADA -> EM_ATENDIMENTO. Chamado pelo prontuario ao abrir o atendimento. */
     void iniciarAtendimento(Long consultaId);
 

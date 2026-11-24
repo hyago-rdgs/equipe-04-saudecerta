@@ -2,14 +2,19 @@ package br.edu.ifpa.saudecerta.painel.aplicacao;
 
 import java.time.Clock;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
 
 import org.springframework.stereotype.Service;
 
 import br.edu.ifpa.saudecerta.agenda.api.AgendaFachada;
 import br.edu.ifpa.saudecerta.agenda.api.ConsultaInfo;
+import br.edu.ifpa.saudecerta.agenda.api.TotalDeConsultas;
 import br.edu.ifpa.saudecerta.cadastro.api.CadastroFachada;
-import br.edu.ifpa.saudecerta.compartilhado.erro.MissaoPendenteException;
+import br.edu.ifpa.saudecerta.cadastro.api.ProfissionalResumo;
+import br.edu.ifpa.saudecerta.painel.dominio.PeriodoDoRelatorio;
 import br.edu.ifpa.saudecerta.seguranca.api.Perfil;
 import br.edu.ifpa.saudecerta.seguranca.api.UsuarioLogado;
 
@@ -41,9 +46,33 @@ public class PainelService {
                 cadastro.totalDePacientesAtivos(), cadastro.profissionaisAtivos().size(), consultas);
     }
 
-    /** MISSAO E3-3: relatorios de consultas por periodo, profissional e especialidade. */
-    public Object relatorioDeConsultas(LocalDate de, LocalDate ate) {
-        throw new MissaoPendenteException("E3-3", "Relatórios ainda não implementados. Veja a missão E3-3 em MISSOES.md.");
+    public RelatorioDeConsultas relatorioDeConsultas(LocalDate de, LocalDate ate) {
+        var periodo = new PeriodoDoRelatorio(de, ate);
+        List<TotalDeConsultas> contagens = agenda.totaisPorProfissionalESituacao(periodo.de(), periodo.ate());
+        Map<Long, Long> totaisPorId = new TreeMap<>();
+        Map<String, Long> porSituacao = new TreeMap<>();
+        for (TotalDeConsultas contagem : contagens) {
+            totaisPorId.merge(contagem.profissionalId(), contagem.total(), Long::sum);
+            porSituacao.merge(contagem.situacao(), contagem.total(), Long::sum);
+        }
+
+        Map<Long, ProfissionalResumo> profissionais = cadastro.profissionais(totaisPorId.keySet());
+        Map<String, Long> porEspecialidade = new TreeMap<>();
+        var porProfissional = new ArrayList<RelatorioDeConsultas.TotalPorProfissional>();
+        for (var entrada : totaisPorId.entrySet()) {
+            Long id = entrada.getKey();
+            long total = entrada.getValue();
+            ProfissionalResumo profissional = profissionais.get(id);
+            String nome = profissional == null ? "Profissional #" + id : profissional.nome();
+            String especialidade = profissional == null || profissional.especialidade() == null
+                    ? "Sem especialidade" : profissional.especialidade();
+            porEspecialidade.merge(especialidade, total, Long::sum);
+            porProfissional.add(new RelatorioDeConsultas.TotalPorProfissional(id, nome, total));
+        }
+
+        long total = porSituacao.values().stream().mapToLong(Long::longValue).sum();
+        return new RelatorioDeConsultas(periodo.de(), periodo.ate(), total, porSituacao, porProfissional,
+                porEspecialidade);
     }
 
     private static int contar(List<ConsultaInfo> consultas, String status) {

@@ -8,6 +8,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import br.edu.ifpa.saudecerta.cadastro.api.CadastroFachada;
@@ -17,6 +18,7 @@ import br.edu.ifpa.saudecerta.cadastro.modelo.Paciente;
 import br.edu.ifpa.saudecerta.cadastro.modelo.Profissional;
 import br.edu.ifpa.saudecerta.cadastro.persistencia.PacienteRepository;
 import br.edu.ifpa.saudecerta.cadastro.persistencia.ProfissionalRepository;
+import br.edu.ifpa.saudecerta.compartilhado.erro.RegraDeNegocioException;
 
 @Service
 @Transactional(readOnly = true)
@@ -28,6 +30,16 @@ public class CadastroFachadaImpl implements CadastroFachada {
     public CadastroFachadaImpl(PacienteRepository pacientes, ProfissionalRepository profissionais) {
         this.pacientes = pacientes;
         this.profissionais = profissionais;
+    }
+
+    @Override
+    @Transactional(propagation = Propagation.MANDATORY)
+    public void bloquearParaReserva(Long profissionalId, Long pacienteId) {
+        // Ordem comum a todas as reservas, inclusive quando o horário está vazio.
+        profissionais.buscarParaReserva(profissionalId)
+                .orElseThrow(() -> new RegraDeNegocioException("Profissional não encontrado."));
+        pacientes.buscarParaReserva(pacienteId)
+                .orElseThrow(() -> new RegraDeNegocioException("Paciente não encontrado."));
     }
 
     @Override

@@ -59,6 +59,11 @@ public class Atendimento {
         }
     }
 
+    public void autorizarPrescricao(Long profissionalId) {
+        exigirResponsavel(profissionalId);
+        exigirAberto();
+    }
+
     public void registrar(String queixaPrincipal, String evolucao, String conduta) {
         exigirAberto();
         this.queixaPrincipal = limpar(queixaPrincipal);

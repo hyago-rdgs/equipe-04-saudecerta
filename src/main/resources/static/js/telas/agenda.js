@@ -253,13 +253,79 @@ function detalharConsulta(c, usuario, aoConcluir) {
       }
     });
 
-    // Missao E3-1: a API responde 501 ate a equipe implementar a remarcacao.
-    dialogo.querySelector('#remarcar')?.addEventListener('click', async () => {
+    dialogo.querySelector('#remarcar')?.addEventListener('click', () => {
+      fechar();
+      remarcar(c, aoConcluir);
+    });
+  });
+}
+
+function remarcar(consulta, aoConcluir) {
+  const hoje = hojeISO();
+  const dataAtual = consulta.inicio.slice(0, 10);
+  abrirDialogo(html`
+    <form>
+      <h2>Remarcar consulta</h2>
+      <p class="dialogo-contexto">${consulta.paciente}, com ${consulta.profissional}.
+        Horário atual em ${dataCurta(dataAtual)} às ${hora(consulta.inicio)}.</p>
+      <label>Nova data
+        <input type="date" name="data" min="${hoje}" value="${dataAtual < hoje ? hoje : dataAtual}" required>
+      </label>
+      <label>Novo horário
+        <select name="horario" required disabled><option value="">Carregando…</option></select>
+      </label>
+      <p class="erro-geral" data-erro-geral role="alert"></p>
+      <div class="dialogo-acoes">
+        <button type="button" class="botao botao-secundario" data-fechar>Voltar</button>
+        <button type="submit" class="botao" disabled>Confirmar remarcação</button>
+      </div>
+    </form>`, (dialogo, fechar) => {
+    const form = dialogo.querySelector('form');
+    const { data, horario } = form.elements;
+    const confirmar = form.querySelector('[type="submit"]');
+    const erro = form.querySelector('[data-erro-geral]');
+    let consultaEmCurso = 0;
+
+    async function carregarHorarios() {
+      const pedido = ++consultaEmCurso;
+      horario.disabled = confirmar.disabled = true;
+      erro.textContent = '';
+      desenhar(horario, html`<option value="">${data.value ? 'Carregando…' : 'Escolha a data'}</option>`);
+      if (!data.value) return;
       try {
-        await api.remarcar(c.id, c.inicio);
+        const livres = await api.horariosLivres(consulta.profissionalId, data.value, consulta.id);
+        if (pedido !== consultaEmCurso) return;
+        desenhar(horario, html`
+          <option value="">${livres.length ? 'Escolha o horário' : 'Nenhum horário livre'}</option>
+          ${livres.map((livre) => html`<option value="${livre}">${livre.slice(0, 5)}</option>`)}`);
+        horario.disabled = livres.length === 0;
+        confirmar.disabled = livres.length === 0;
       } catch (e) {
+        if (pedido !== consultaEmCurso) return;
+        desenhar(horario, html`<option value="">Horários indisponíveis</option>`);
         erro.textContent = e.detalhe;
       }
+    }
+
+    data.addEventListener('change', carregarHorarios);
+    form.addEventListener('submit', async (evento) => {
+      evento.preventDefault();
+      const destino = data.value;
+      const novoHorario = horario.value.slice(0, 5);
+      confirmar.disabled = data.disabled = horario.disabled = true;
+      erro.textContent = '';
+      try {
+        await api.remarcar(consulta.id, `${destino}T${novoHorario}:00`);
+        dia = destino;
+        fechar();
+        avisar(`Consulta remarcada para ${dataCurta(destino)} às ${novoHorario}.`);
+        aoConcluir();
+      } catch (e) {
+        data.disabled = false;
+        await carregarHorarios();
+        mostrarErrosDeCampo(form, e);
+      }
     });
+    carregarHorarios();
   });
 }
