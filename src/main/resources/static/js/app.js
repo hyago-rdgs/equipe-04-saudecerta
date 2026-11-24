@@ -10,7 +10,8 @@ import { telaPacientes } from './telas/pacientes.js';
 import { telaProntuario, telaAtendimento } from './telas/prontuario.js';
 import { telaProfissionais } from './telas/profissionais.js';
 import { telaAuditoria } from './telas/auditoria.js';
-import { telaMissao } from './telas/missao.js';
+import { telaRelatorios } from './telas/relatorios.js';
+import { telaPortal } from './telas/portal.js';
 
 const raiz = document.getElementById('app');
 
@@ -21,8 +22,8 @@ const ROTAS = [
   { caminho: 'pacientes', titulo: 'Pacientes', perfis: ['ADMIN', 'RECEPCAO', 'PROFISSIONAL'], tela: telaPacientes },
   { caminho: 'profissionais', titulo: 'Profissionais', perfis: ['ADMIN'], tela: telaProfissionais },
   { caminho: 'auditoria', titulo: 'Auditoria', perfis: ['ADMIN'], tela: telaAuditoria },
-  { caminho: 'relatorios', titulo: 'Relatórios', perfis: ['ADMIN'], missao: 'E3-3', tela: (area) => telaMissao(area, 'E3-3') },
-  { caminho: 'portal', titulo: 'Minhas consultas', perfis: ['PACIENTE'], missao: 'E3-4', tela: (area) => telaMissao(area, 'E3-4') },
+  { caminho: 'relatorios', titulo: 'Relatórios', perfis: ['ADMIN'], tela: telaRelatorios },
+  { caminho: 'portal', titulo: 'Minhas consultas', perfis: ['PACIENTE'], tela: telaPortal },
   // Rotas sem item de menu
   { caminho: 'prontuario', perfis: ['PROFISSIONAL'], tela: telaProntuario },
   { caminho: 'atendimento', perfis: ['PROFISSIONAL'], tela: telaAtendimento },
@@ -65,7 +66,7 @@ function navegar() {
       <nav class="menu" aria-label="Seções">
         ${permitidas.filter((r) => r.titulo).map((r) => html`
           <a href="#/${r.caminho}" class="${r.caminho === rota.caminho ? 'ativo' : ''}">
-            ${r.titulo}${r.missao ? html` <small>(missão ${r.missao})</small>` : ''}
+            ${r.titulo}
           </a>`)}
       </nav>
       <main id="tela" tabindex="-1"></main>

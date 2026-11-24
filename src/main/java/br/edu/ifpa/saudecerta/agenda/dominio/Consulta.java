@@ -20,7 +20,7 @@ public class Consulta {
     private final Long id;
     private final Long pacienteId;
     private final Long profissionalId;
-    private final LocalDateTime inicio;
+    private LocalDateTime inicio;
     private final int duracaoMinutos;
     private StatusConsulta status;
     private final String observacao;
@@ -44,6 +44,12 @@ public class Consulta {
         if (pacienteId == null || profissionalId == null || inicio == null) {
             throw new RegraDeNegocioException("Paciente, profissional e horário são obrigatórios.");
         }
+        validarHorario(inicio, DURACAO_MINUTOS, agora);
+        return new Consulta(null, pacienteId, profissionalId, inicio, DURACAO_MINUTOS, StatusConsulta.AGENDADA,
+                observacao, null);
+    }
+
+    private static void validarHorario(LocalDateTime inicio, int duracaoMinutos, LocalDateTime agora) {
         if (!inicio.isAfter(agora)) {
             throw new RegraDeNegocioException("Não é possível agendar em um horário que já passou.");
         }
@@ -54,11 +60,36 @@ public class Consulta {
             throw new RegraDeNegocioException("As consultas começam em horários cheios ou meia hora (ex.: 08:00, 08:30).");
         }
         LocalTime hora = inicio.toLocalTime();
-        if (hora.isBefore(ABERTURA) || hora.plusMinutes(DURACAO_MINUTOS).isAfter(FECHAMENTO)) {
+        if (hora.isBefore(ABERTURA) || hora.plusMinutes(duracaoMinutos).isAfter(FECHAMENTO)) {
             throw new RegraDeNegocioException("Horário fora do funcionamento da clínica (07:00 às 19:00).");
         }
-        return new Consulta(null, pacienteId, profissionalId, inicio, DURACAO_MINUTOS, StatusConsulta.AGENDADA,
-                observacao, null);
+    }
+
+    public boolean podeRemarcarOuCancelar() {
+        return status == StatusConsulta.AGENDADA || status == StatusConsulta.CONFIRMADA;
+    }
+
+    public void remarcar(LocalDateTime novoInicio, LocalDateTime agora) {
+        if (!podeRemarcarOuCancelar()) {
+            throw new RegraDeNegocioException("Só é possível remarcar uma consulta agendada ou confirmada.");
+        }
+        if (novoInicio == null || novoInicio.equals(inicio)) {
+            throw new RegraDeNegocioException("Escolha um horário diferente do atual.");
+        }
+        validarHorario(novoInicio, duracaoMinutos, agora);
+        inicio = novoInicio;
+        status = StatusConsulta.AGENDADA;
+    }
+
+    public boolean futura(LocalDateTime agora) {
+        return inicio.isAfter(agora);
+    }
+
+    public void cancelarPeloPaciente(String motivo, LocalDateTime agora) {
+        if (!futura(agora)) {
+            throw new RegraDeNegocioException("Você só pode cancelar consultas futuras.");
+        }
+        cancelar(motivo);
     }
 
     /** Recria uma consulta ja existente (uso exclusivo da persistencia). Nao valida regras de criacao. */
@@ -79,8 +110,11 @@ public class Consulta {
 
     /** Dois intervalos conflitam quando um comeca antes de o outro terminar, e vice-versa. */
     public boolean conflitaCom(Consulta outra) {
-        return ocupaHorario() && outra.ocupaHorario()
-                && inicio.isBefore(outra.fim()) && outra.inicio.isBefore(fim());
+        return ocupaHorario() && outra.ocupaIntervalo(inicio, fim());
+    }
+
+    public boolean ocupaIntervalo(LocalDateTime de, LocalDateTime ate) {
+        return ocupaHorario() && inicio.isBefore(ate) && de.isBefore(fim());
     }
 
     /** O paciente chegou a recepcao. */
@@ -101,14 +135,18 @@ public class Consulta {
     }
 
     public void cancelar(String motivo) {
-        if (status != StatusConsulta.AGENDADA && status != StatusConsulta.CONFIRMADA) {
+        if (!podeRemarcarOuCancelar()) {
             throw new RegraDeNegocioException("Esta consulta não pode mais ser cancelada (situação: " + status + ").");
         }
         if (motivo == null || motivo.isBlank()) {
             throw new RegraDeNegocioException("Informe o motivo do cancelamento.");
         }
+        String motivoLimpo = motivo.trim();
+        if (motivoLimpo.length() > 200) {
+            throw new RegraDeNegocioException("O motivo do cancelamento deve ter até 200 caracteres.");
+        }
         status = StatusConsulta.CANCELADA;
-        motivoCancelamento = motivo.trim();
+        motivoCancelamento = motivoLimpo;
     }
 
     private void exigir(StatusConsulta esperado, String mensagem) {

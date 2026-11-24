@@ -4,4 +4,9 @@ package br.edu.ifpa.saudecerta.auditoria.api;
 public interface Auditoria {
 
     void registrar(EventoDeAuditoria evento);
+
+    /** Registra o sucesso junto com a operação que já está em andamento. */
+    default void registrarNaTransacaoAtual(EventoDeAuditoria evento) {
+        registrar(evento);
+    }
 }

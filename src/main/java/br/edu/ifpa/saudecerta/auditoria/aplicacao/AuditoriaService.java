@@ -35,6 +35,16 @@ public class AuditoriaService implements Auditoria {
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void registrar(EventoDeAuditoria evento) {
+        salvar(evento);
+    }
+
+    @Override
+    @Transactional(propagation = Propagation.MANDATORY)
+    public void registrarNaTransacaoAtual(EventoDeAuditoria evento) {
+        salvar(evento);
+    }
+
+    private void salvar(EventoDeAuditoria evento) {
         registros.save(new RegistroDeAuditoria(LocalDateTime.now(relogio), limitar(evento.usuario(), 60),
                 evento.perfil(), evento.acao(), evento.recurso(), evento.recursoId(), evento.pacienteId(),
                 limitar(evento.detalhe(), 300)));

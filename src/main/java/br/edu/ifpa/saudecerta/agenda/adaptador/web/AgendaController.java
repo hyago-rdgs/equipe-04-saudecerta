@@ -51,8 +51,9 @@ public class AgendaController {
 
     @GetMapping("/api/agenda/horarios-livres")
     public List<LocalTime> horariosLivres(@RequestParam Long profissionalId,
-            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate data) {
-        return agenda.horariosLivres(profissionalId, data);
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate data,
+            @RequestParam(required = false) Long consultaId, @AuthenticationPrincipal Jwt token) {
+        return agenda.horariosLivres(profissionalId, data, consultaId, UsuarioAtual.de(token));
     }
 
     @PostMapping("/api/consultas")

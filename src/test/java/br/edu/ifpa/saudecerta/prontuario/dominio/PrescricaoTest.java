@@ -3,21 +3,12 @@ package br.edu.ifpa.saudecerta.prontuario.dominio;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import br.edu.ifpa.saudecerta.compartilhado.erro.RegraDeNegocioException;
 import br.edu.ifpa.saudecerta.prontuario.dominio.Prescricao.Item;
 
-/**
- * MISSAO E3-2 - a especificacao da prescricao, escrita como teste.
- *
- * Passo a passo: apague a linha @Disabled, rode "mvn test", veja os testes
- * falharem e implemente Prescricao ate todos passarem. So depois va para o
- * caso de uso, a persistencia e a API.
- */
-@Disabled("Missão E3-2: remova esta linha e implemente Prescricao")
 class PrescricaoTest {
 
     private static final Item AMOXICILINA = new Item("Amoxicilina 500 mg", "1 cápsula", "de 8 em 8 horas por 7 dias");

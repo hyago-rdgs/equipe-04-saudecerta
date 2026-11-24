@@ -96,7 +96,8 @@ export const api = {
   criarEspecialidade: (nome) => chamar('POST', '/api/especialidades', { nome }),
 
   agenda: (data, profissionalId) => chamar('GET', `/api/agenda${consulta({ data, profissionalId })}`),
-  horariosLivres: (profissionalId, data) => chamar('GET', `/api/agenda/horarios-livres${consulta({ profissionalId, data })}`),
+  horariosLivres: (profissionalId, data, consultaId) =>
+    chamar('GET', `/api/agenda/horarios-livres${consulta({ profissionalId, data, consultaId })}`),
   agendar: (dados) => chamar('POST', '/api/consultas', dados),
   confirmarChegada: (id) => chamar('POST', `/api/consultas/${id}/chegada`),
   cancelarConsulta: (id, motivo) => chamar('POST', `/api/consultas/${id}/cancelamento`, { motivo }),
@@ -107,10 +108,12 @@ export const api = {
   registrarAtendimento: (id, registro) => chamar('PUT', `/api/atendimentos/${id}`, registro),
   finalizarAtendimento: (id) => chamar('POST', `/api/atendimentos/${id}/finalizacao`),
   prescricoes: (atendimentoId) => chamar('GET', `/api/atendimentos/${atendimentoId}/prescricoes`),
+  prescrever: (atendimentoId, itens) => chamar('POST', `/api/atendimentos/${atendimentoId}/prescricoes`, { itens }),
 
   auditoria: (pacienteId) => chamar('GET', `/api/auditoria${consulta({ pacienteId })}`),
   relatorioDeConsultas: (de, ate) => chamar('GET', `/api/relatorios/consultas${consulta({ de, ate })}`),
   minhasConsultas: () => chamar('GET', '/api/portal/consultas'),
+  cancelarPeloPortal: (id, motivo) => chamar('POST', `/api/portal/consultas/${id}/cancelamento`, { motivo }),
 
   rastro: (id) => chamar('GET', `/api/raio-x/${id}`),
 };

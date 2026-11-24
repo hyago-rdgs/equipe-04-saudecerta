@@ -7,6 +7,7 @@ import java.util.Optional;
 
 import org.springframework.stereotype.Component;
 
+import br.edu.ifpa.saudecerta.agenda.api.TotalDeConsultas;
 import br.edu.ifpa.saudecerta.agenda.aplicacao.ConsultaRepositorio;
 import br.edu.ifpa.saudecerta.agenda.dominio.Consulta;
 
@@ -28,6 +29,29 @@ public class ConsultaRepositorioJpa implements ConsultaRepositorio {
     @Override
     public Optional<Consulta> buscarPorId(Long id) {
         return jpa.findById(id).map(ConsultaJpa::paraDominio);
+    }
+
+    @Override
+    public Optional<Consulta> buscarParaAlterar(Long id) {
+        return jpa.buscarParaAlterar(id).map(ConsultaJpa::paraDominio);
+    }
+
+    @Override
+    public Optional<Consulta> buscarDoPacienteParaAlterar(Long id, Long pacienteId) {
+        return jpa.findByIdAndPacienteId(id, pacienteId).map(ConsultaJpa::paraDominio);
+    }
+
+    @Override
+    public List<Consulta> doPaciente(Long pacienteId) {
+        return jpa.findByPacienteIdOrderByInicioDescIdDesc(pacienteId).stream().map(ConsultaJpa::paraDominio).toList();
+    }
+
+    @Override
+    public List<TotalDeConsultas> totaisPorProfissionalESituacao(LocalDate de, LocalDate ate) {
+        return jpa.contarPorProfissionalESituacao(de.atStartOfDay(), ate.plusDays(1).atStartOfDay()).stream()
+                .map(contagem -> new TotalDeConsultas(contagem.getProfissionalId(), contagem.getStatus().name(),
+                        contagem.getTotal()))
+                .toList();
     }
 
     @Override

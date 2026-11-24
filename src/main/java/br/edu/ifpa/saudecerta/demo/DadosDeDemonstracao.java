@@ -1,6 +1,7 @@
 package br.edu.ifpa.saudecerta.demo;
 
 import java.time.Clock;
+import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -145,6 +146,8 @@ public class DadosDeDemonstracao implements CommandLineRunner {
         consulta(larissa, ana, amanha, 9, 0, StatusConsulta.AGENDADA, "Retorno com exames", null);
         consulta(raimundo, rafael, amanha, 10, 0, StatusConsulta.AGENDADA, null, null);
         consulta(davi, helena, amanha, 8, 30, StatusConsulta.AGENDADA, "Vacinas em dia?", null);
+        LocalDate proximaConsultaPortal = amanha.getDayOfWeek() == DayOfWeek.SUNDAY ? amanha.plusDays(1) : amanha;
+        consulta(joana, ana, proximaConsultaPortal, 10, 0, StatusConsulta.AGENDADA, null, null);
     }
 
     private Paciente paciente(String nome, String cpf, LocalDate nascimento, String telefone, String alertas) {

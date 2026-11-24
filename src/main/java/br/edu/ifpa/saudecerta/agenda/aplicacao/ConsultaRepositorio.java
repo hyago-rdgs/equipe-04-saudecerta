@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
+import br.edu.ifpa.saudecerta.agenda.api.TotalDeConsultas;
 import br.edu.ifpa.saudecerta.agenda.dominio.Consulta;
 
 /**
@@ -15,6 +16,14 @@ public interface ConsultaRepositorio {
     Consulta salvar(Consulta consulta);
 
     Optional<Consulta> buscarPorId(Long id);
+
+    Optional<Consulta> buscarParaAlterar(Long id);
+
+    Optional<Consulta> buscarDoPacienteParaAlterar(Long id, Long pacienteId);
+
+    List<Consulta> doPaciente(Long pacienteId);
+
+    List<TotalDeConsultas> totaisPorProfissionalESituacao(LocalDate de, LocalDate ate);
 
     List<Consulta> doDia(LocalDate data);
 
