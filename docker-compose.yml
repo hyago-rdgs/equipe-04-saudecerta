@@ -1,0 +1,10 @@
+# Banco PostgreSQL opcional (perfil "postgres"). O projeto roda sem isto, com H2 em memoria.
+services:
+  banco:
+    image: postgres:17
+    environment:
+      POSTGRES_DB: saudecerta
+      POSTGRES_USER: saudecerta
+      POSTGRES_PASSWORD: saudecerta
+    ports:
+      - "5432:5432"

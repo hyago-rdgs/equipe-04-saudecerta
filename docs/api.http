@@ -1,0 +1,74 @@
+### Requisicoes prontas para o IntelliJ (HTTP Client) ou VS Code (extensao REST Client).
+### Execute o login primeiro; o token e reaproveitado nas seguintes.
+
+@base = http://localhost:8080
+
+### Login (troque o usuario para ver outros perfis: ana, rafael, admin, joana)
+# @name login
+POST {{base}}/api/auth/login
+Content-Type: application/json
+
+{ "login": "recepcao", "senha": "saude123" }
+
+###
+@token = {{login.response.body.token}}
+
+### Resumo do dia
+GET {{base}}/api/painel
+Authorization: Bearer {{token}}
+
+### Buscar pacientes por nome ou CPF
+GET {{base}}/api/pacientes?busca=maria
+Authorization: Bearer {{token}}
+
+### Cadastrar paciente (repita para ver o 409 de CPF duplicado; estrague o CPF para ver o 422)
+POST {{base}}/api/pacientes
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{ "nome": "Teste da Silva", "cpf": "766.344.002-10", "dataNascimento": "1990-05-20", "telefone": "(91) 90000-0000" }
+
+### Agenda de um dia (ajuste a data)
+GET {{base}}/api/agenda?data=2026-11-17
+Authorization: Bearer {{token}}
+
+### Horarios livres de um profissional
+GET {{base}}/api/agenda/horarios-livres?profissionalId=1&data=2026-11-17
+Authorization: Bearer {{token}}
+
+### Agendar (ajuste a data para um dia util futuro; repita para ver o 409)
+POST {{base}}/api/consultas
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{ "pacienteId": 3, "profissionalId": 4, "inicio": "2026-11-17T10:00:00", "observacao": "Primeira consulta" }
+
+### Confirmar chegada
+POST {{base}}/api/consultas/5/chegada
+Authorization: Bearer {{token}}
+
+### Cancelar
+POST {{base}}/api/consultas/6/cancelamento
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{ "motivo": "Paciente pediu para desmarcar" }
+
+### Remarcar - MISSAO E3-1 (responde 501)
+PUT {{base}}/api/consultas/5/horario
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{ "inicio": "2026-11-17T11:00:00" }
+
+### Prontuario - com o token da recepcao responde 403; entre como "ana" e repita
+GET {{base}}/api/pacientes/1/prontuario
+Authorization: Bearer {{token}}
+
+### Auditoria - so com o token do "admin"
+GET {{base}}/api/auditoria?pacienteId=1
+Authorization: Bearer {{token}}
+
+### Ultimos rastros do Raio-X
+GET {{base}}/api/raio-x
+Authorization: Bearer {{token}}
